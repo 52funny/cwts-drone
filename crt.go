@@ -65,16 +65,6 @@ func NewCRTSharing(n int, t int, moduli []*gmp.Int) *CRTSharing {
 	}
 	T1 := T
 
-	// Make sure the PMin is greater than (L+1) * p0
-	if pMin.Cmp(leftBoundary) != 1 {
-		panic("PMin must be greater than (L+1) * p")
-	}
-
-	// Make sure the PMin is greater than the PMax
-	if pMin.Cmp(pMax) != 1 {
-		panic("PMin must be greater than PMax")
-	}
-
 	// Calculate the secret
 	// S = p0 + p * L
 	S := new(gmp.Int).SetInt64(0)
@@ -103,6 +93,12 @@ func NewCRTSharing(n int, t int, moduli []*gmp.Int) *CRTSharing {
 		T++
 	}
 	T2 := T
+
+	// (L+1) * p0 < PMin < PMin2 < 2 ** HASH_BITS * S
+	// Make sure the PMin is greater than (L+1) * p0
+	if pMin.Cmp(leftBoundary) != 1 {
+		panic("PMin must be greater than (L+1) * p")
+	}
 
 	// Make sure the PMin2 is large than 2 ** HASH_BITS * S
 	if pMin2.Cmp(rightBoundary) != 1 {

@@ -17,6 +17,7 @@ func main() {
 	t := 4
 	crt := scheme.NewCRTSharing(n, t, moduli)
 	fmt.Println(crt.ThresholdT1, crt.ThresholdT2)
+	fmt.Println(crt.PMin1.BitLen(), crt.PMin2.BitLen())
 
 	ei := make([]*bls12381.Scalar, 0, n)
 	Ei := make([]*bls12381.G1, 0, n)
@@ -59,7 +60,9 @@ func main() {
 	R := new(bls12381.G1)
 	tt := time.Now()
 	for _, p := range params {
+		tt := time.Now()
 		s, r := p.Sign(m, B)
+		fmt.Println("Every Sign Time Cost:", time.Since(tt))
 		R = r
 		signs = append(signs, s)
 	}
