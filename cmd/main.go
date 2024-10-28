@@ -73,6 +73,8 @@ func main() {
 	fmt.Println("Aggregate Time Cost:", time.Since(tt))
 	fmt.Printf("%-10s = %s\n%-10s = %x\n", "s", s, "R", R.Bytes())
 
+	tt = time.Now()
 	res := scheme.Verify(m, s, R, crt.Pub)
+	fmt.Println("Verify Time Cost:", time.Since(tt))
 	fmt.Println("Verify:", res)
 }

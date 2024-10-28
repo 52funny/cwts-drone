@@ -4,6 +4,8 @@ go 1.23.2
 
 require (
 	github.com/cloudflare/circl v1.5.0
+	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/ncw/gmp v1.0.5
 	github.com/stretchr/testify v1.9.0
 )
