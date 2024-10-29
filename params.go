@@ -26,7 +26,7 @@ func (p *Param) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
 	// Commitment R
 	R := B.Commitment(m)
 	// rho
-	rho := p.Rho(m)
+	rho := p.rho(m, B)
 
 	// erho = e * rho
 	erho := new(bls12381.Scalar)
@@ -86,16 +86,18 @@ type BItem struct {
 	D *bls12381.G1 // D
 }
 
-// Rho returns the rho of the i-th drone
+// rho returns the rho of the i-th drone
 // rho = H(m || E || D)
-func (item BItem) Rho(m string) *bls12381.Scalar {
-	rhoContent := make([]byte, 0)
-	// rhoContent = binary.BigEndian.AppendUint64(rhoContent, uint64(i))
-	rhoContent = append(rhoContent, []byte(m)...)
-	rhoContent = append(rhoContent, item.E.BytesCompressed()...)
-	rhoContent = append(rhoContent, item.D.BytesCompressed()...)
-	rhoBytes := sha256.Sum256(rhoContent)
+func (item BItem) rho(m string, b B) *bls12381.Scalar {
+	// rho = H(m || B)
 	rho := new(bls12381.Scalar)
+	rhoContent := make([]byte, 0)
+	rhoContent = append(rhoContent, []byte(m)...)
+	for _, item := range b {
+		rhoContent = append(rhoContent, item.E.Bytes()...)
+		rhoContent = append(rhoContent, item.D.Bytes()...)
+	}
+	rhoBytes := sha256.Sum256(rhoContent)
 	rho.SetBytes(rhoBytes[:])
 	return rho
 }
@@ -114,26 +116,21 @@ func NewB(moduli []*gmp.Int, Ei []*bls12381.G1, Di []*bls12381.G1) B {
 
 // Commitment returns the commitment(R) of the i-th drone
 func (b B) Commitment(m string) *bls12381.G1 {
-	var R *bls12381.G1 = nil
+	R := new(bls12381.G1)
+	R.SetIdentity()
+
+	sumD := new(bls12381.G1)
+	sumD.SetIdentity()
+
+	// rho = H(m || B)
+	rho := b[0].rho(m, b)
 	for _, item := range b {
-		// rho = H(m || E || D)
-		rho := item.Rho(m)
-
-		// rhoE = rho * E
-		rhoE := new(bls12381.G1)
-		rhoE.ScalarMult(rho, item.E)
-
 		// ans = D + rhoE
-		ans := new(bls12381.G1)
-		ans.Add(item.D, rhoE)
-
-		// R = R + D + rho * E
-		if R == nil {
-			R = ans
-		} else {
-			R.Add(R, ans)
-		}
+		R.Add(R, item.D)
+		sumD.Add(sumD, item.E)
 	}
+	sumD.ScalarMult(rho, sumD)
+	R.Add(R, sumD)
 	return R
 }
 

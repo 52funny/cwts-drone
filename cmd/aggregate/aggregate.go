@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -223,6 +224,9 @@ func transform(m map[string]*scheme.BItem) B {
 		}
 		b = append(b, item)
 	}
+	slices.SortFunc(b, func(a, b BItem) int {
+		return a.P.Cmp(b.P)
+	})
 	return b
 }
 
