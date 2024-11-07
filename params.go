@@ -136,11 +136,14 @@ func (b B) Commitment(m string) *bls12381.G1 {
 
 // Aggregate the signature
 func Aggregate(s []*gmp.Int, R *bls12381.G1, P *gmp.Int) (*gmp.Int, *bls12381.G1) {
+	order := new(gmp.Int).SetBytes(bls12381.Order()[:])
+	defer order.Clear()
 	sAgg := new(gmp.Int).SetInt64(0)
 	for _, si := range s {
 		sAgg.Add(sAgg, si)
 	}
 	sAgg.Mod(sAgg, P)
+	sAgg.Mod(sAgg, order)
 	return sAgg, R
 }
 
