@@ -59,7 +59,7 @@ func NewCRTSharing(n int, t int, moduli []*gmp.Int) *CRTSharing {
 	// Calculate the PMin
 	pMin := new(gmp.Int).SetInt64(1)
 	T := 0
-	for pMin.Cmp(leftBoundary) != 1 {
+	for T < n && pMin.Cmp(leftBoundary) != 1 {
 		pMin.Mul(pMin, moduli[T])
 		T += 1
 	}
@@ -88,7 +88,7 @@ func NewCRTSharing(n int, t int, moduli []*gmp.Int) *CRTSharing {
 	rightBoundary.Mul(rightBoundary, S)
 
 	pMin2 := new(gmp.Int).Set(pMin)
-	for pMin2.Cmp(rightBoundary) != 1 {
+	for T < n && pMin2.Cmp(rightBoundary) != 1 {
 		pMin2.Mul(pMin2, moduli[T])
 		T++
 	}
