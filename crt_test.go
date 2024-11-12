@@ -20,6 +20,7 @@ var di []*bls12381.Scalar
 var Ei []*bls12381.G1
 var Di []*bls12381.G1
 
+// Setup the parameters
 func preparation() {
 	weightOpts := []int{256}
 	n := *N

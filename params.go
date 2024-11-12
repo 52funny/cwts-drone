@@ -23,10 +23,11 @@ func NewParam(e, d *bls12381.Scalar, s *gmp.Int, pub *bls12381.G1, b BItem) *Par
 // Sign returns the signature of the i-th drone
 // Threshold schnorr signature = (s, R)
 func (p *Param) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
-	// Commitment R
-	R := B.Commitment(m)
 	// rho
 	rho := p.rho(m, B)
+
+	// Commitment R
+	R := B.commitment(rho)
 
 	// erho = e * rho
 	erho := new(bls12381.Scalar)
@@ -49,7 +50,7 @@ func (p *Param) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
 	gmpK := ScalarToGmp(k)
 
 	// lambda = Q * Q^-1
-	lambda := p.Lambda(B)
+	lambda := p.lambda(B)
 
 	// sc = lambda * s * c
 	sc := new(gmp.Int).SetInt64(1)
@@ -64,9 +65,9 @@ func (p *Param) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
 	return s, R
 }
 
-// Lambda returns the lambda of the drone
-// Lambda = Q * Q^-1
-func (p *Param) Lambda(B B) *gmp.Int {
+// lambda returns the lambda of the drone
+// lambda = Q * Q^-1
+func (p *Param) lambda(B B) *gmp.Int {
 	Q := new(gmp.Int).SetInt64(1)
 	for _, item := range B {
 		Q.Mul(Q, item.P)
@@ -89,16 +90,15 @@ type BItem struct {
 // rho returns the rho of the i-th drone
 // rho = H(m || E || D)
 func (item BItem) rho(m string, b B) *bls12381.Scalar {
-	// rho = H(m || B)
+	bytesM := []byte(m)
 	rho := new(bls12381.Scalar)
-	rhoContent := make([]byte, 0)
-	rhoContent = append(rhoContent, []byte(m)...)
-	for _, item := range b {
-		rhoContent = append(rhoContent, item.E.Bytes()...)
-		rhoContent = append(rhoContent, item.D.Bytes()...)
+	sha := sha256.New()
+	sha.Write(bytesM)
+	for i := 0; i < len(b); i++ {
+		sha.Write(b[i].E.BytesCompressed())
+		sha.Write(b[i].D.BytesCompressed())
 	}
-	rhoBytes := sha256.Sum256(rhoContent)
-	rho.SetBytes(rhoBytes[:])
+	rho.SetBytes(sha.Sum(nil))
 	return rho
 }
 
@@ -115,22 +115,19 @@ func NewB(moduli []*gmp.Int, Ei []*bls12381.G1, Di []*bls12381.G1) B {
 }
 
 // Commitment returns the commitment(R) of the i-th drone
-func (b B) Commitment(m string) *bls12381.G1 {
+func (b B) commitment(rho *bls12381.Scalar) *bls12381.G1 {
 	R := new(bls12381.G1)
 	R.SetIdentity()
 
-	sumD := new(bls12381.G1)
-	sumD.SetIdentity()
+	sumE := new(bls12381.G1)
+	sumE.SetIdentity()
 
-	// rho = H(m || B)
-	rho := b[0].rho(m, b)
 	for _, item := range b {
-		// ans = D + rhoE
 		R.Add(R, item.D)
-		sumD.Add(sumD, item.E)
+		sumE.Add(sumE, item.E)
 	}
-	sumD.ScalarMult(rho, sumD)
-	R.Add(R, sumD)
+	sumE.ScalarMult(rho, sumE)
+	R.Add(R, sumE)
 	return R
 }
 
