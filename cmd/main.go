@@ -45,10 +45,10 @@ func main() {
 
 	P := new(gmp.Int).SetInt64(1)
 
-	params := make([]*scheme.Param, 0, T)
+	signers := make([]*scheme.Signer, 0, T)
 	for i := 0; i < T; i++ {
 		P.Mul(P, moduli[i])
-		params = append(params, scheme.NewParam(ei[i], di[i], remainder[i], crt.Pub, B[i]))
+		signers = append(signers, scheme.NewSigner(ei[i], di[i], remainder[i], crt.Pub, B[i]))
 	}
 
 	fmt.Printf("%-10s = %s\n", "S", crt.Secret)
@@ -59,7 +59,7 @@ func main() {
 	signs := make([]*gmp.Int, 0, T)
 	R := new(bls12381.G1)
 	tt := time.Now()
-	for _, p := range params {
+	for _, p := range signers {
 		tt := time.Now()
 		s, r := p.Sign(m, B)
 		fmt.Println("Every Sign Time Cost:", time.Since(tt))

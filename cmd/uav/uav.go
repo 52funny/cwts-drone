@@ -91,7 +91,7 @@ func main() {
 	}
 	pub := new(bls12381.G1)
 	pub.SetBytes(secret.Pub)
-	pp := scheme.NewParam(e, d, secret.Remainder, pub, bItem)
+	pp := scheme.NewSigner(e, d, secret.Remainder, pub, bItem)
 
 	fmt.Printf("pp.Pub: %x\n", pp.Pub.BytesCompressed())
 

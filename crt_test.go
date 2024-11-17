@@ -8,6 +8,7 @@ import (
 	"github.com/52funny/scheme"
 	"github.com/cloudflare/circl/ecc/bls12381"
 	"github.com/ncw/gmp"
+	"github.com/stretchr/testify/assert"
 )
 
 var N = flag.Int("num", 50, "number of shares")
@@ -49,6 +50,30 @@ var once = sync.OnceFunc(func() {
 	preparation()
 })
 
+func TestCRT(t *testing.T) {
+	once()
+	T := crt.ThresholdT2
+	remainder := crt.Remainder
+	B := scheme.NewB(moduli[:T], Ei[:T], Di[:T])
+
+	m := "Hello World"
+	signers := make([]*scheme.Signer, 0, T)
+	signs := make([]*gmp.Int, 0, T)
+	Rs := make([]*bls12381.G1, 0, T)
+
+	P := new(gmp.Int).SetInt64(1)
+	for i := 0; i < T; i++ {
+		signers = append(signers, scheme.NewSigner(ei[i], di[i], remainder[i], crt.Pub, B[i]))
+		s, R := signers[i].Sign(m, B)
+		signs = append(signs, s)
+		Rs = append(Rs, R)
+		P.Mul(P, moduli[i])
+	}
+
+	s, r := scheme.Aggregate(signs, Rs[0], P)
+	assert.True(t, scheme.Verify(m, s, r, crt.Pub))
+}
+
 func BenchmarkSign(b *testing.B) {
 	once()
 	T := crt.ThresholdT2
@@ -56,16 +81,16 @@ func BenchmarkSign(b *testing.B) {
 	B := scheme.NewB(moduli[:T], Ei[:T], Di[:T])
 	P := new(gmp.Int).SetInt64(1)
 
-	params := make([]*scheme.Param, 0, T)
+	signers := make([]*scheme.Signer, 0, T)
 	for i := 0; i < T; i++ {
 		P.Mul(P, moduli[i])
-		params = append(params, scheme.NewParam(ei[i], di[i], remainder[i], crt.Pub, B[i]))
+		signers = append(signers, scheme.NewSigner(ei[i], di[i], remainder[i], crt.Pub, B[i]))
 	}
 
 	m := "Hello World"
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		params[0].Sign(m, B)
+		signers[0].Sign(m, B)
 	}
 }
 
@@ -76,22 +101,26 @@ func BenchmarkSignAggregation(b *testing.B) {
 	B := scheme.NewB(moduli[:T], Ei[:T], Di[:T])
 	P := new(gmp.Int).SetInt64(1)
 
-	params := make([]*scheme.Param, 0, T)
+	signers := make([]*scheme.Signer, 0, T)
 	for i := 0; i < T; i++ {
 		P.Mul(P, moduli[i])
-		params = append(params, scheme.NewParam(ei[i], di[i], remainder[i], crt.Pub, B[i]))
+		signers = append(signers, scheme.NewSigner(ei[i], di[i], remainder[i], crt.Pub, B[i]))
 	}
 
 	m := "Hello World"
 	signs := make([]*gmp.Int, 0, T)
 	R := new(bls12381.G1)
-	for _, p := range params {
+	for _, p := range signers {
 		s, r := p.Sign(m, B)
 		R = r
 		signs = append(signs, s)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		P := new(gmp.Int).SetInt64(1)
+		for j := 0; j < T; j++ {
+			P.Mul(P, moduli[j])
+		}
 		scheme.Aggregate(signs, R, P)
 	}
 }
@@ -103,16 +132,16 @@ func BenchmarkSignVerify(b *testing.B) {
 	B := scheme.NewB(moduli[:T], Ei[:T], Di[:T])
 	P := new(gmp.Int).SetInt64(1)
 
-	params := make([]*scheme.Param, 0, T)
+	signers := make([]*scheme.Signer, 0, T)
 	for i := 0; i < T; i++ {
 		P.Mul(P, moduli[i])
-		params = append(params, scheme.NewParam(ei[i], di[i], remainder[i], crt.Pub, B[i]))
+		signers = append(signers, scheme.NewSigner(ei[i], di[i], remainder[i], crt.Pub, B[i]))
 	}
 
 	m := "Hello World"
 	signs := make([]*gmp.Int, 0, T)
 	R := new(bls12381.G1)
-	for _, p := range params {
+	for _, p := range signers {
 		s, r := p.Sign(m, B)
 		R = r
 		signs = append(signs, s)

@@ -7,8 +7,8 @@ import (
 	"github.com/ncw/gmp"
 )
 
-// Parameters owned by the drone
-type Param struct {
+// Parameters owned by the signer
+type Signer struct {
 	e     *bls12381.Scalar // e
 	d     *bls12381.Scalar // d
 	s     *gmp.Int         // remainder
@@ -16,13 +16,13 @@ type Param struct {
 	BItem                  // BItem
 }
 
-func NewParam(e, d *bls12381.Scalar, s *gmp.Int, pub *bls12381.G1, b BItem) *Param {
-	return &Param{e: e, d: d, s: s, Pub: pub, BItem: b}
+func NewSigner(e, d *bls12381.Scalar, s *gmp.Int, pub *bls12381.G1, b BItem) *Signer {
+	return &Signer{e: e, d: d, s: s, Pub: pub, BItem: b}
 }
 
 // Sign returns the signature of the i-th drone
 // Threshold schnorr signature = (s, R)
-func (p *Param) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
+func (p *Signer) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
 	// rho
 	rho := p.rho(m, B)
 
@@ -67,7 +67,7 @@ func (p *Param) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
 
 // lambda returns the lambda of the drone
 // lambda = Q * Q^-1
-func (p *Param) lambda(B B) *gmp.Int {
+func (p *Signer) lambda(B B) *gmp.Int {
 	Q := new(gmp.Int).SetInt64(1)
 	for _, item := range B {
 		Q.Mul(Q, item.P)
@@ -132,7 +132,7 @@ func (b B) commitment(rho *bls12381.Scalar) *bls12381.G1 {
 }
 
 // Aggregate the signature
-func Aggregate(s []*gmp.Int, R *bls12381.G1, P *gmp.Int) (*gmp.Int, *bls12381.G1) {
+func Aggregate(s []*gmp.Int, R *bls12381.G1, P *gmp.Int) (*bls12381.Scalar, *bls12381.G1) {
 	order := new(gmp.Int).SetBytes(bls12381.Order()[:])
 	defer order.Clear()
 	sAgg := new(gmp.Int).SetInt64(0)
@@ -141,23 +141,24 @@ func Aggregate(s []*gmp.Int, R *bls12381.G1, P *gmp.Int) (*gmp.Int, *bls12381.G1
 	}
 	sAgg.Mod(sAgg, P)
 	sAgg.Mod(sAgg, order)
-	return sAgg, R
+	sS := new(bls12381.Scalar)
+	sS.SetBytes(sAgg.Bytes())
+	return sS, R
 }
 
 // Verify the signature
-func Verify(m string, s *gmp.Int, R *bls12381.G1, pub *bls12381.G1) bool {
+func Verify(m string, s *bls12381.Scalar, R *bls12381.G1, pub *bls12381.G1) bool {
 	// c = H(m || R)
-	cContent := make([]byte, 0)
-	cContent = append(cContent, []byte(m)...)
-	cContent = append(cContent, R.Bytes()...)
-	cBytes := sha256.Sum256(cContent)
+	hasher := sha256.New()
+	hasher.Write([]byte(m))
+	hasher.Write(R.Bytes())
+
 	c := new(bls12381.Scalar)
-	c.SetBytes(cBytes[:])
+	c.SetBytes(hasher.Sum(nil))
 
 	// left = s * G
-	sScalar := GmpToScalar(s)
 	left := new(bls12381.G1)
-	left.ScalarMult(sScalar, bls12381.G1Generator())
+	left.ScalarMult(s, bls12381.G1Generator())
 
 	// right = R + c * pub
 	right := new(bls12381.G1)
