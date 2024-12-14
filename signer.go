@@ -162,7 +162,8 @@ func Verify(m string, s *bls12381.Scalar, R *bls12381.G1, pub *bls12381.G1) bool
 
 	// right = R + c * pub
 	right := new(bls12381.G1)
-	right.SetBytes(R.Bytes())
+	right.SetIdentity()
+	right.Add(right, R)
 
 	// cPub = c * pub
 	cPub := new(bls12381.G1)

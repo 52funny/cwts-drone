@@ -6,11 +6,14 @@ import (
 )
 
 // 128 bit statistical level
-const LAMBDA int = 128
+const LAMBDA int = 256
 
 // 256 bit output of the hash function
 // sha256
 const HASH_BITS int = 256
+
+// The order of the BLS12-381 curve
+const BLS12381_ORDER = "73EDA753299D7D483339D80809A1D80553BDA402FFFE5BFEFFFFFFFF00000001"
 
 type CRTSharing struct {
 	N           int          // Number of parties
@@ -45,7 +48,10 @@ func NewCRTSharing(n int, t int, moduli []*gmp.Int) *CRTSharing {
 	L.Lsh(L, uint(LAMBDA+pMax.BitLen()))
 
 	// Generate a random prime number within lambda bits
-	p := GeneratePrime(LAMBDA)
+	// p := GeneratePrime(LAMBDA)
+	//
+	// bls12381 curve order as the prime number
+	p, _ := new(gmp.Int).SetString(BLS12381_ORDER, 16)
 	tmp := GeneratePrime(LAMBDA)
 
 	p0 := new(gmp.Int).Mod(tmp, p)

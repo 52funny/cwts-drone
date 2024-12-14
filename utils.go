@@ -20,7 +20,7 @@ func GeneratePrime(bits int) *gmp.Int {
 		rand.Read(buf)
 
 		// Make sure the highest bit is 1
-		buf[0] |= 0b01000000
+		buf[0] |= 0b10000000
 		// Make sure the lowest bit is 1
 		buf[len(buf)-1] |= 0b00000001
 
