@@ -61,7 +61,7 @@ func main() {
 	tt := time.Now()
 	for _, p := range signers {
 		tt := time.Now()
-		s, r := p.Sign(m, B)
+		s, r := p.Sign(m, crt.Pub, B)
 		fmt.Println("Every Sign Time Cost:", time.Since(tt))
 		R = r
 		signs = append(signs, s)

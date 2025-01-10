@@ -22,9 +22,9 @@ func NewSigner(e, d *bls12381.Scalar, s *gmp.Int, pub *bls12381.G1, b BItem) *Si
 
 // Sign returns the signature of the i-th drone
 // Threshold schnorr signature = (s, R)
-func (p *Signer) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
+func (p *Signer) Sign(m string, pub *bls12381.G1, B B) (*gmp.Int, *bls12381.G1) {
 	// rho
-	rho := p.rho(m, B)
+	rho := p.rho(m, pub, B)
 
 	// Commitment R
 	R := B.commitment(rho)
@@ -38,6 +38,7 @@ func (p *Signer) Sign(m string, B B) (*gmp.Int, *bls12381.G1) {
 	k.Add(p.d, erho)
 
 	cContent := make([]byte, 0)
+	cContent = append(cContent, []byte(pub.BytesCompressed())...)
 	cContent = append(cContent, []byte(m)...)
 	cContent = append(cContent, R.Bytes()...)
 	cBytes := sha256.Sum256(cContent)
@@ -89,10 +90,11 @@ type BItem struct {
 
 // rho returns the rho of the i-th drone
 // rho = H(m || E || D)
-func (item BItem) rho(m string, b B) *bls12381.Scalar {
+func (item BItem) rho(m string, pub *bls12381.G1, b B) *bls12381.Scalar {
 	bytesM := []byte(m)
 	rho := new(bls12381.Scalar)
 	sha := sha256.New()
+	sha.Write(pub.BytesCompressed())
 	sha.Write(bytesM)
 	for i := 0; i < len(b); i++ {
 		sha.Write(b[i].E.BytesCompressed())
@@ -150,6 +152,7 @@ func Aggregate(s []*gmp.Int, R *bls12381.G1, P *gmp.Int) (*bls12381.Scalar, *bls
 func Verify(m string, s *bls12381.Scalar, R *bls12381.G1, pub *bls12381.G1) bool {
 	// c = H(m || R)
 	hasher := sha256.New()
+	hasher.Write(pub.BytesCompressed())
 	hasher.Write([]byte(m))
 	hasher.Write(R.Bytes())
 

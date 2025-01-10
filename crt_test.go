@@ -64,7 +64,7 @@ func TestCRT(t *testing.T) {
 	P := new(gmp.Int).SetInt64(1)
 	for i := 0; i < T; i++ {
 		signers = append(signers, scheme.NewSigner(ei[i], di[i], remainder[i], crt.Pub, B[i]))
-		s, R := signers[i].Sign(m, B)
+		s, R := signers[i].Sign(m, crt.Pub, B)
 		signs = append(signs, s)
 		Rs = append(Rs, R)
 		P.Mul(P, moduli[i])
@@ -90,7 +90,7 @@ func BenchmarkSign(b *testing.B) {
 	m := "Hello World"
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		signers[0].Sign(m, B)
+		signers[0].Sign(m, crt.Pub, B)
 	}
 }
 
@@ -111,7 +111,7 @@ func BenchmarkSignAggregation(b *testing.B) {
 	signs := make([]*gmp.Int, 0, T)
 	R := new(bls12381.G1)
 	for _, p := range signers {
-		s, r := p.Sign(m, B)
+		s, r := p.Sign(m, crt.Pub, B)
 		R = r
 		signs = append(signs, s)
 	}
@@ -142,7 +142,7 @@ func BenchmarkSignVerify(b *testing.B) {
 	signs := make([]*gmp.Int, 0, T)
 	R := new(bls12381.G1)
 	for _, p := range signers {
-		s, r := p.Sign(m, B)
+		s, r := p.Sign(m, crt.Pub, B)
 		R = r
 		signs = append(signs, s)
 	}

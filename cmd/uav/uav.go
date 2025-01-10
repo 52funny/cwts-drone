@@ -146,7 +146,7 @@ func main() {
 		case "SIGN":
 			// SIGN is the message to sign the message
 			tt := time.Now()
-			s, R := pp.Sign(m, BList)
+			s, R := pp.Sign(m, pub, BList)
 			fmt.Println("Sign Time Cost:", time.Since(tt))
 			fmt.Printf("s: %v\n", s)
 			fmt.Printf("R: %x\n", R.BytesCompressed())
