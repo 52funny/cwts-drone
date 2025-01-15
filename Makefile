@@ -1,3 +1,7 @@
+.PHONE: build tools clean
+
+all: build tools
+
 build:
 	go build cmd/ta/*
 	go build cmd/uav/*
@@ -5,3 +9,6 @@ build:
 
 tools:
 	go build cmd/tools/*
+
+clean: 
+	rm -f ta uav aggregate launch
