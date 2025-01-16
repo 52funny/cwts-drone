@@ -1,12 +1,13 @@
 # Compact and Weighted Threshold Signature Scheme for Verifiable Drone Swarm Messaging
 
-![AHU@SMC](https://img.shields.io/badge/AHU@-SMC-blue)
+![SMC@AHU](https://img.shields.io/badge/SMC@-AHU-blue)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/52funny/cwts-drone)
 ![GitHub](https://img.shields.io/github/license/52funny/cwts-drone)
 
 This project provides a **Golang** implementation for handling weighted threshold signature schemes in heterogeneous drone swarms.
 
 ![Demo](./demo.gif)
+
 
 ## Key Features
 
@@ -89,6 +90,19 @@ We welcome contributions from the community! Please follow the steps below:
    git checkout -b feature/your-feature-name
    ```
 3. Commit your code and create a Pull Request.
+
+## Acknowledgements
+
+This project makes use of the following open-source libraries and tools:
+
+- [GNU MP Library (GMP)](https://gmplib.org/): Provides efficient multiple-precision arithmetic operations.
+- [GMP Golang Wrapper](https://github.com/ncw/gmp): A Go wrapper for the GNU MP Library (GMP)
+- [Cloudflare CIRCL](https://github.com/cloudflare/circl): A cryptographic library for high-performance elliptic curve operations.
+- [Google UUID](https://github.com/google/uuid): For generating and handling UUIDs.
+- [Gorilla WebSocket](https://github.com/gorilla/websocket): Implements WebSocket protocol for real-time communication.
+- [Testify](https://github.com/stretchr/testify): A toolkit for writing unit tests and making assertions.
+
+We deeply appreciate the developers and contributors of these projects for their efforts in advancing the open-source ecosystem.
 
 ## Contact Us
 

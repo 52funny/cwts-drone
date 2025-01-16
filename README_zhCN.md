@@ -1,8 +1,12 @@
 # Compact and Weighted Threshold Signature Scheme for Verifiable Drone Swarm Messaging
 
+![SMC@AHU](https://img.shields.io/badge/SMC@-AHU-blue)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/52funny/cwts-drone)
+![GitHub](https://img.shields.io/github/license/52funny/cwts-drone)
+
 本项目提供了一个基于 **Golang** 的实现，用于处理异构异构无人机集群中的多权重阈值签名方案。
 
-![Demo](./demo.gif)
+![Demo](demo.gif)
 
 ## 特色功能
 
@@ -85,6 +89,19 @@ go test -bench Benchmark -run=$^ -num=256 -threshold=32 --benchmem
    git checkout -b feature/your-feature-name
    ```
 3. 提交代码并发起 Pull Request。
+
+## 致谢
+
+本项目使用了以下开源库和工具：
+
+- [GNU MP Library (GMP)](https://gmplib.org/)：提供高效的多精度算术操作。
+- [GMP Golang Wrapper](https://github.com/ncw/gmp)：GNU MP 库的 Go 封装，用于实现高性能大数运算。
+- [Cloudflare CIRCL](https://github.com/cloudflare/circl)：Cloudflare 椭圆曲线密码库。
+- [Google UUID](https://github.com/google/uuid)：用于生成和处理 UUID。
+- [Gorilla WebSocket](https://github.com/gorilla/websocket)：实现 WebSocket 协议，用于实时通信。
+- [Testify](https://github.com/stretchr/testify)：用于编写单元测试和断言的工具包。
+
+我们深表感谢这些库的开发者和维护者，他们对开源社区的贡献使得本项目成为可能！
 
 ## 联系我们
 
