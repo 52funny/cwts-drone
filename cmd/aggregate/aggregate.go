@@ -284,13 +284,13 @@ func CollectSignature(collectCh chan Signature, aggregate chan interface{}, stor
 			p := store.CalculateP()
 
 			tt := time.Now()
-			s, r := scheme.Aggregate(signs, R[0], p)
+			z, r := scheme.Aggregate(signs, R[0], p)
 			fmt.Println("Aggregate Time Cost:", time.Since(tt))
 
 			fmt.Println("Aggregated Signature:")
-			fmt.Printf("s: %v\n", s)
+			fmt.Printf("z: %v\n", z)
 			fmt.Printf("R: %x\n", r.BytesCompressed())
-			t := scheme.Verify("Hello World!", s, r, &pub)
+			t := scheme.Verify("Hello World!", z, r, &pub)
 			fmt.Println("Verify:", t)
 		}
 	}
