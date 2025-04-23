@@ -1,4 +1,4 @@
-# Compact and Weighted Threshold Signature Scheme for Verifiable Drone Swarm Messaging
+# Concise and Weighted Threshold Signature Scheme for Verifiable Drone Swarm Messaging
 
 ![SMC@AHU](https://img.shields.io/badge/SMC@-AHU-blue)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/52funny/cwts-drone)

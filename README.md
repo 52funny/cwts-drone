@@ -1,4 +1,4 @@
-# Compact and Weighted Threshold Signature Scheme for Verifiable Drone Swarm Messaging
+# 	Concise and Weighted Threshold Signature Scheme for Verifiable Messaging in Heterogeneous Drone Swarms
 
 ![SMC@AHU](https://img.shields.io/badge/SMC@-AHU-blue)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/52funny/cwts-drone)
@@ -7,7 +7,6 @@
 This project provides a **Golang** implementation for handling weighted threshold signature schemes in heterogeneous drone swarms.
 
 ![Demo](./demo.gif)
-
 
 ## Key Features
 
