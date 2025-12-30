@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	mrand "math/rand"
 	"slices"
+	"sync"
 
 	"github.com/cloudflare/circl/ecc/bls12381"
 	"github.com/ncw/gmp"
@@ -81,18 +82,28 @@ func Compact(arr []*gmp.Int) []*gmp.Int {
 func GenerateNumber(weightOpts []int, n int) []*gmp.Int {
 	ch := make(chan int, n)
 	product := make(chan *gmp.Int, n)
+	sets := sync.Map{}
 
 	for i := 0; i < GOROUTINES; i++ {
 		go func() {
 			for weight := range ch {
 				p := GenerateRangePrime(weight, n)
+				// Ensure the prime number is unique
+				for {
+					if _, loaded := sets.LoadOrStore(p.String(), struct{}{}); !loaded {
+						break
+					}
+					p = GenerateRangePrime(weight, n)
+				}
 				product <- p
 			}
 		}()
 	}
 
+	weightOptsLen := len(weightOpts)
+
 	for range n {
-		w := weightOpts[mrand.Intn(len(weightOpts))]
+		w := weightOpts[mrand.Intn(weightOptsLen)]
 		ch <- w
 	}
 
