@@ -61,7 +61,7 @@ func (r *RpcService) GetPublicKey(args int, reply *[]byte) error {
 }
 
 func main() {
-	weight_opts := []int{64, 128, 256}
+	weight_opts := []int{16, 128, 512}
 	n := 100
 
 	moduli := scheme.GenerateNumber(weight_opts, n)

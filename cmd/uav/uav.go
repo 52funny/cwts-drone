@@ -154,6 +154,7 @@ func main() {
 				S: s,
 				R: R.BytesCompressed(),
 			}
+			fmt.Println("Signature Size:", len(s.Bytes())+len(R.BytesCompressed()))
 			var buffer bytes.Buffer
 			gob.NewEncoder(&buffer).Encode(signMsg)
 			msg := Message{
